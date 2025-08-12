@@ -1,19 +1,15 @@
-import openai
 import os
+from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def evaluate_supplier_risk(comment):
-    prompt = (
-        f"Rate the risk level of this supplier comment from 1 (low) to 10 (high):\n"
-        f"{comment}\n"
-        f"Only return the number."
+def evaluate_risk(comment):
+    prompt = f"Rate the business risk of the following supplier comment from 1 (very low) to 10 (very high):\n\n'{comment}'\n\nOnly return the number."
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=10
     )
-
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response['choices'][0]['message']['content'].strip()
+    return response.choices[0].message.content.strip()
